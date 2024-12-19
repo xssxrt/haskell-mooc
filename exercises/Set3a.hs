@@ -234,7 +234,7 @@ xs +|+ ys = [head xs, head ys]
 
 
 sumRights :: [Either a Int] -> Int
-sumRights xs = sum (map (either (\_ -> 0)(\x -> x)) xs)
+sumRights xs = sum $ map (either (\_ -> 0)(\x -> x)) xs
 
 ------------------------------------------------------------------------------
 -- Ex 12: recall the binary function composition operation
@@ -310,15 +310,14 @@ multiApp f gs x =
 -- using (:). If you build the list in an argument to a helper
 -- function, the surprise won't work. See section 3.8 in the material.
 
-interpreterHelper :: [String] -> Integer -> Integer -> [String] -> [String]
-interpreterHelper [] _ _ ps = ps
-interpreterHelper cs x y ps = case cs of 
-    ("up":t) -> interpreterHelper t x (y+1) ps
-    ("down":t) -> interpreterHelper t x (y-1) ps
-    ("right":t) -> interpreterHelper t (x+1) y ps
-    ("left":t) -> interpreterHelper t (x-1) y ps
-    ("printX":t) -> interpreterHelper t x y (ps ++ show x : [])
-    ("printY":t) -> interpreterHelper t x y (ps ++ show y: [])
 
 interpreter :: [String] -> [String]
-interpreter commands =  interpreterHelper commands 0 0 []
+interpreter commands = move 0 0 commands
+  where move x y ("up":commands) = move x (y+1) commands
+        move x y ("down":commands) = move x (y-1) commands
+        move x y ("right":commands) = move (x+1) y commands
+        move x y ("left":commands) = move (x-1) y commands
+        move x y ("printX":commands) = show x : move x y commands
+        move x y ("printY":commands) = show y : move x y commands
+        move x y [] = []
+        move x y (_:commands) = "INVALID" : move x y commands
